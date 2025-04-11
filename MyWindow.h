@@ -15,11 +15,15 @@ private:
     // Member variables:
     Gtk::Label output_label;             // Widget for displaying command output.
     Gtk::ScrolledWindow scrolled_window; // Makes the output scrollable.
+    Gtk::Entry *ping_entry;              // We'll create and manage this via Gtk::make_managed.
+    Gtk::Entry *trace_route_entry;
 
     // Signal handlers:
     void on_ipconfig_clicked();
     void on_help_clicked();
     void on_exit_clicked();
+    void on_ping_clicked();
+    void on_trace_route_clicked();
 };
 
 // Other window declarations:
