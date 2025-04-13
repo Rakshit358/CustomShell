@@ -37,8 +37,29 @@ class SystemInformationWindow : public Gtk::Window
 {
 public:
     SystemInformationWindow();
-};
 
+private:
+    // Output Area
+    Gtk::Label output_heading_label;
+    Gtk::ScrolledWindow scrolled_window;
+    Gtk::Label output_label;
+
+    // System Information Buttons
+    Gtk::Button *btn_hostname;
+    Gtk::Button *btn_os_details;
+    Gtk::Button *btn_cpu_info;
+    Gtk::Button *btn_memory_info;
+    Gtk::Button *btn_disk_info;
+    Gtk::Button *btn_exit;
+
+    // Signal Handlers
+    void on_hostname_clicked();
+    void on_os_details_clicked();
+    void on_cpu_info_clicked();
+    void on_memory_info_clicked();
+    void on_disk_info_clicked();
+    void on_click_exit_window();
+};
 class MyWindow : public Gtk::Window
 {
 public:
