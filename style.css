@@ -5,13 +5,12 @@ window {
 }
 
 button {
-    background-color: whitesmoke;  /* Blue button */
-    color: black;               /* White text */
-    font-size: 16px;            /* Bigger font */
-    padding: 10px;              /* More spacing */
-    border-radius: 8px;         /* Rounded corners */
-    border: 2px solid #2980b9;  /* Outline */
+    font-size: 16px;
+    background-color: #009688;
+    color: white;
+    border-radius: 5px;
 }
+
 
 button:hover {
     background-color: #2980b9;  /* Darker blue on hover */

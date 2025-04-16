@@ -2,8 +2,7 @@
 #include <iostream>
 #include <cstdio>
 #include <thread>
-//#include <glibmm/main.h>
-
+// #include <glibmm/main.h>
 
 /*std::string execute_command(const std::string &command)
 {
@@ -20,7 +19,6 @@
     return result;
 }*/
 
-
 FileManagementWindow::FileManagementWindow()
 {
     set_title("File Management commands");
@@ -31,7 +29,6 @@ FileManagementWindow::FileManagementWindow()
     auto label_mkdir = Gtk::make_managed<Gtk::Label>("Enter directory name:");
     mkdir_entry = Gtk::make_managed<Gtk::Entry>();
     auto btn_mkdir = Gtk::make_managed<Gtk::Button>("mkdir");
-
 
     auto btn_exit = Gtk::make_managed<Gtk::Button>("Exit");
 
@@ -49,12 +46,11 @@ FileManagementWindow::FileManagementWindow()
     vbox->append(*label_mkdir);
     vbox->append(*mkdir_entry);
     vbox->append(*btn_mkdir);
-    
+
     vbox->append(scrolled_window);
     vbox->append(*btn_exit);
 
     set_child(*vbox);
-
 }
 
 void FileManagementWindow::on_pwd_clicked()
@@ -100,8 +96,6 @@ void FileManagementWindow::on_mkdir_clicked()
     }
 
     output_label.set_text(result);
-
-
 }
 
 void FileManagementWindow::on_exit_clicked()
