@@ -36,11 +36,15 @@ private:
     Gtk::Label output_label;
     Gtk::ScrolledWindow scrolled_window;
     Gtk::Entry *mkdir_entry;
-    
+    Gtk::Entry *type_entry;
+    // Gtk::Entry *cd_entry;
+
     void on_pwd_clicked();
     void on_mkdir_clicked();
+    void on_dir_clicked();
+    void on_type_clicked();
     void on_exit_clicked();
-
+    // void on_cd_clicked();
 };
 
 class SystemInformationWindow : public Gtk::Window
