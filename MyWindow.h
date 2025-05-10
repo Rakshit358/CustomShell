@@ -5,6 +5,21 @@
 #include <map>
 #include <string>
 
+class CLIWindow : public Gtk::Window
+{
+public:
+    CLIWindow();
+
+private:
+    Gtk::Box box{Gtk::Orientation::VERTICAL};
+    Gtk::Entry command_entry;
+    Gtk::Button run_button{"Run"};
+    Gtk::ScrolledWindow scrolled_window;
+    Gtk::TextView output_text_view;
+
+    void on_run_clicked();
+};
+
 // NetworkingWindow: This window displays networking commands and their output.
 class NetworkingWindow : public Gtk::Window
 {
@@ -84,8 +99,10 @@ private:
     Gtk::Button btn2{"File Management"};
     Gtk::Button btn3{"System Information"};
     Gtk::Button exit_button{"Exit"};
+    Gtk::Button cli_button{"Open CLI"};
     Gtk::Box box{Gtk::Orientation::VERTICAL};
 
+    void on_cli_clicked();
     void on_networking_clicked();
     void on_file_management_clicked();
     void on_system_information_clicked();
