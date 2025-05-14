@@ -1,17 +1,61 @@
 window {
-    background-color: lightgray; /* Dark-themed background */
-    border-radius: 20px;
-    color: black;
+    background-color: #ffffff;
+    border-radius: 16px;
+    color: #1a1a1a;
+    padding: 24px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 15px;
 }
 
 button {
     font-size: 16px;
-    background-color: #009688;
-    color: white;
-    border-radius: 5px;
+    background: linear-gradient(135deg, #00897b, #00695c);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.25s ease-in-out;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12);
 }
 
-
 button:hover {
-    background-color: #2980b9;  /* Darker blue on hover */
+    background: linear-gradient(135deg, #00796b, #004d40);
+    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.18);
+}
+
+button:active {
+    background: #003d33;
+    transform: scale(0.98);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+input, textarea, select, entry, GtkEntry {
+    font-size: 15px;
+    padding: 10px 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #ffffff;
+    color: #1a1a1a;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+input:focus, textarea:focus, select:focus, entry:focus, GtkEntry:focus {
+    border-color: #26a69a;
+    box-shadow: 0 0 0 3px rgba(0, 150, 136, 0.1);
+    background-color: #ffffff;
+    color: #000000;
+}
+
+GtkTextView, textview {
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 10px;
+    color: #1a1a1a;
+    font-size: 14px;
 }
