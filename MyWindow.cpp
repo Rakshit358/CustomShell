@@ -3,7 +3,7 @@
 
 MyWindow::MyWindow()
 {
-    set_title("Custom Shell");
+    set_title("AeroShell");
     set_default_size(800, 800);
 
     // Set up the main window
