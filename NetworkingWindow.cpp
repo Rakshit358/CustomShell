@@ -23,53 +23,66 @@ std::string execute_command(const std::string &command)
 NetworkingWindow::NetworkingWindow()
 {
     set_title("Networking Commands");
-    set_default_size(1000, 1000);
+    set_resizable(true);
+    set_default_size(1200, 1200);
+    set_margin(10);
 
-    // Create a vertical box for layout.
-    auto vbox = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL, 10);
+    auto vbox = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL, 12);
+    vbox->set_margin(15);
 
-    // Create the ipconfig, help, and exit buttons.
-    auto btn_ipconfig = Gtk::make_managed<Gtk::Button>("ipconfig");
-    auto btn_help = Gtk::make_managed<Gtk::Button>("Help");
-    auto btn_exit = Gtk::make_managed<Gtk::Button>("Exit");
+    auto header_label = Gtk::make_managed<Gtk::Label>("Networking Panel");
+    header_label->get_style_context()->add_class("header");
+    vbox->append(*header_label);
 
-    // --- Create the Ping controls ---
-    auto label_ping = Gtk::make_managed<Gtk::Label>("Enter target for Ping:");
-    ping_entry = Gtk::make_managed<Gtk::Entry>(); // Allocate the entry so it can be accessed in on_ping_clicked.
-    auto btn_ping = Gtk::make_managed<Gtk::Button>("Ping");
+    output_label.set_text("Command output will appear here...");
+    output_label.set_wrap(true);
+    output_label.set_hexpand(true);
+    output_label.set_vexpand(true);
+    output_label.get_style_context()->add_class("output-area");
 
-    auto label_trace_route = Gtk::make_managed<Gtk::Label>("Enter target to trace route:");
-    trace_route_entry = Gtk::make_managed<Gtk::Entry>();
-    auto btn_trace_route = Gtk::make_managed<Gtk::Button>("Trace Route");
-
-    // Connect button signals to their handlers.
-    btn_ipconfig->signal_clicked().connect(sigc::mem_fun(*this, &NetworkingWindow::on_ipconfig_clicked));
-    btn_ping->signal_clicked().connect(sigc::mem_fun(*this, &NetworkingWindow::on_ping_clicked));
-    btn_help->signal_clicked().connect(sigc::mem_fun(*this, &NetworkingWindow::on_help_clicked));
-    btn_exit->signal_clicked().connect(sigc::mem_fun(*this, &NetworkingWindow::on_exit_clicked));
-    btn_trace_route->signal_clicked().connect(sigc::mem_fun(*this, &NetworkingWindow::on_trace_route_clicked));
-
-    output_label.set_text("Command Output Will Be Displayed Here....");
-
-    // Configure the scrolled window to display command output.
     scrolled_window.set_policy(Gtk::PolicyType::AUTOMATIC, Gtk::PolicyType::AUTOMATIC);
-    scrolled_window.set_child(output_label);
     scrolled_window.set_expand(true);
+    scrolled_window.set_child(output_label);
 
-    // Pack everything into the vertical box.
-    vbox->append(*btn_ipconfig);
-    // --- Ping controls ---
-    vbox->append(*label_ping);
-    vbox->append(*ping_entry);
-    vbox->append(*btn_ping);
+    auto output_frame = Gtk::make_managed<Gtk::Frame>("Output");
+    output_frame->set_child(scrolled_window);
+    output_frame->set_margin_bottom(10);
+    vbox->append(*output_frame);
 
-    vbox->append(*label_trace_route);
-    vbox->append(*trace_route_entry);
-    vbox->append(*btn_trace_route);
+    auto grid = Gtk::make_managed<Gtk::Grid>();
+    grid->set_column_spacing(12);
+    grid->set_row_spacing(10);
 
-    // Display the command output.
-    vbox->append(scrolled_window);
-    vbox->append(*btn_help);
+    auto btn_ipconfig = Gtk::make_managed<Gtk::Button>("ipconfig");
+    btn_ipconfig->signal_clicked().connect(sigc::mem_fun(*this, &NetworkingWindow::on_ipconfig_clicked));
+    grid->attach(*btn_ipconfig, 0, 0, 1, 1);
+
+    ping_entry = Gtk::make_managed<Gtk::Entry>();
+    ping_entry->set_placeholder_text("Target for Ping");
+    auto btn_ping = Gtk::make_managed<Gtk::Button>("Ping");
+    btn_ping->signal_clicked().connect(sigc::mem_fun(*this, &NetworkingWindow::on_ping_clicked));
+    grid->attach(*btn_ping, 0, 1, 1, 1);
+    grid->attach(*ping_entry, 1, 1, 1, 1);
+
+    trace_route_entry = Gtk::make_managed<Gtk::Entry>();
+    trace_route_entry->set_placeholder_text("Target for Trace Route");
+    auto btn_trace = Gtk::make_managed<Gtk::Button>("Trace Route");
+    btn_trace->signal_clicked().connect(sigc::mem_fun(*this, &NetworkingWindow::on_trace_route_clicked));
+    grid->attach(*btn_trace, 0, 2, 1, 1);
+    grid->attach(*trace_route_entry, 1, 2, 1, 1);
+
+    vbox->append(*grid);
+
+    auto btn_copy = Gtk::make_managed<Gtk::Button>("Copy Output");
+    btn_copy->signal_clicked().connect([this]() {
+        auto clipboard = Gdk::Display::get_default()->get_clipboard();
+        clipboard->set_text(output_label.get_text());
+    });
+
+    auto btn_exit = Gtk::make_managed<Gtk::Button>("Exit");
+    btn_exit->signal_clicked().connect(sigc::mem_fun(*this, &NetworkingWindow::on_exit_clicked));
+
+    vbox->append(*btn_copy);
     vbox->append(*btn_exit);
 
     set_child(*vbox);
@@ -156,9 +169,6 @@ void NetworkingWindow::on_trace_route_clicked()
         .detach();
 }
 
-void NetworkingWindow::on_help_clicked()
-{
-}
 
 void NetworkingWindow::on_exit_clicked()
 {
