@@ -18,6 +18,9 @@ private:
     Gtk::TextView output_text_view;
 
     void on_run_clicked();
+
+    Gtk::DrawingArea cli_graph_area;
+    std::vector<int> cli_exec_times_ms;
 };
 
 // NetworkingWindow: This window displays networking commands and their output.
@@ -39,6 +42,9 @@ private:
     void on_exit_clicked();
     void on_ping_clicked();
     void on_trace_route_clicked();
+
+    Gtk::DrawingArea sys_graph_area;
+    std::vector<int> sys_exec_times_ms;
 };
 
 // Other window declarations:
@@ -60,6 +66,9 @@ private:
     void on_type_clicked();
     void on_exit_clicked();
     // void on_cd_clicked();
+
+    Gtk::DrawingArea sys_graph_area;
+    std::vector<int> sys_exec_times_ms;
 };
 
 class SystemInformationWindow : public Gtk::Window
@@ -88,6 +97,9 @@ private:
     void on_memory_info_clicked();
     void on_disk_info_clicked();
     void on_click_exit_window();
+
+    Gtk::DrawingArea sys_graph_area;
+    std::vector<int> sys_exec_times_ms;
 };
 class MyWindow : public Gtk::Window
 {

@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cstdio> // For popen, fgets, and pclose
 #include <thread>
-#include <glibmm/main.h> // For Glib::signal_idle
+#include <glibmm/main.h>
 
 // A helper function that executes a command using popen and returns its complete output.
 std::string execute_command(const std::string &command)
@@ -71,7 +71,59 @@ NetworkingWindow::NetworkingWindow()
     grid->attach(*btn_trace, 0, 2, 1, 1);
     grid->attach(*trace_route_entry, 1, 2, 1, 1);
 
-    vbox->append(*grid);
+    //vbox->append(*grid);
+
+    sys_exec_times_ms.resize(50, 0);
+
+    sys_graph_area.set_content_width(250);
+    sys_graph_area.set_content_height(150);
+    sys_graph_area.set_hexpand(true);
+
+    sys_graph_area.set_draw_func([this](const Cairo::RefPtr<Cairo::Context>& cr, int width, int height) {
+        if (sys_exec_times_ms.empty()) return;
+
+        cr->set_line_width(1.0);
+        cr->set_source_rgb(0.5, 0.5, 0.5); 
+
+        cr->move_to(30, 10);
+        cr->line_to(30, height - 20);
+        cr->stroke();
+
+        cr->move_to(30, height - 20);
+        cr->line_to(width - 10, height - 20);
+        cr->stroke();
+
+        cr->set_source_rgb(0, 0, 0);
+       // cr->select_font_face("Sans", Cairo::FontSlant::NORMAL, Cairo::FontWeight::NORMAL);
+        cr->set_font_size(12);
+        cr->move_to(10, 12);
+        cr->show_text("ms");
+
+        for (int i = 0; i <= 4; ++i) {
+            int y_val = i * (height - 30) / 4;
+            int label_val = 200 - i * 50; 
+            cr->move_to(5, y_val + 20);
+            cr->show_text(std::to_string(label_val));
+        }
+
+        cr->set_source_rgb(1.0, 0.4, 0.3);
+        cr->set_line_width(2.0);
+
+        cr->move_to(30, height - 20 - std::min(height - 40.0, static_cast<double>(sys_exec_times_ms[0])));
+        for (size_t i = 1; i < sys_exec_times_ms.size(); ++i) {
+                if (sys_exec_times_ms.empty()) return;
+                double x = 30 + i * ((width - 40) / static_cast<double>(sys_exec_times_ms.size()));
+                double y = height - 20 - std::min(height - 40.0, static_cast<double>(sys_exec_times_ms[i]));
+                cr->line_to(x, y);
+        }
+        cr->stroke();
+    });
+
+
+    auto hbox = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL, 10);
+    hbox->append(*grid);
+    hbox->append(sys_graph_area);
+    vbox->append(*hbox);
 
     auto btn_copy = Gtk::make_managed<Gtk::Button>("Copy Output");
     btn_copy->signal_clicked().connect([this]() {
@@ -90,8 +142,8 @@ NetworkingWindow::NetworkingWindow()
 
 void NetworkingWindow::on_ipconfig_clicked()
 {
-    // (This implementation remains as before.)
-    std::string command = "ipconfig"; // For Linux, consider "ifconfig" or "ip a"
+    auto start = std::chrono::steady_clock::now();
+    std::string command = "ipconfig";
     std::cout << "Executing ipconfig command..." << std::endl;
     std::string result;
 
@@ -105,12 +157,20 @@ void NetworkingWindow::on_ipconfig_clicked()
         }
         pclose(pipe);
     }
+    auto end = std::chrono::steady_clock::now();
+    int ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
     output_label.set_text(result);
+    sys_exec_times_ms.push_back(ms);
+        if (sys_exec_times_ms.size() > 50)
+            sys_exec_times_ms.erase(sys_exec_times_ms.begin());
+
+    sys_graph_area.queue_draw();
 }
 
 void NetworkingWindow::on_ping_clicked()
 {
+    auto start = std::chrono::steady_clock::now();
     std::string target = ping_entry->get_text();
     if (target.empty())
     {
@@ -128,19 +188,27 @@ void NetworkingWindow::on_ping_clicked()
     std::cout << "Executing ping command: " << command << std::endl;
 
     // Run the command asynchronously.
-    std::thread([this, command]()
+    std::thread([this, command, start]()
                 {
         std::string result = execute_command(command);
         // Post the result back to the UI thread.
-        Glib::signal_idle().connect_once([this, result]() {
+        Glib::signal_idle().connect_once([this, result,start]() {
             // output_label.set_line_wrap(true);
+            auto end = std::chrono::steady_clock::now();
+            int ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
             output_label.set_text(result);
+            sys_exec_times_ms.push_back(ms);
+            if (sys_exec_times_ms.size() > 50)
+                sys_exec_times_ms.erase(sys_exec_times_ms.begin());
+
+            sys_graph_area.queue_draw();
         }); })
         .detach();
 }
 
 void NetworkingWindow::on_trace_route_clicked()
 {
+    auto start = std::chrono::steady_clock::now();
     std::string target = trace_route_entry->get_text();
     if (target.empty())
     {
@@ -158,13 +226,20 @@ void NetworkingWindow::on_trace_route_clicked()
     std::cout << "Executing trace route command: " << command << std::endl;
 
     // Run the command asynchronously.
-    std::thread([this, command]()
+    std::thread([this, command, start]()
                 {
         std::string result = execute_command(command);
         // Post the result back to the UI thread.
-        Glib::signal_idle().connect_once([this, result]() {
+        Glib::signal_idle().connect_once([this, result, start]() {
             // output_label.set_line_wrap(true);
+            auto end = std::chrono::steady_clock::now();
+            int ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
             output_label.set_text(result);
+            sys_exec_times_ms.push_back(ms);
+            if (sys_exec_times_ms.size() > 50)
+                sys_exec_times_ms.erase(sys_exec_times_ms.begin());
+
+            sys_graph_area.queue_draw();
         }); })
         .detach();
 }
