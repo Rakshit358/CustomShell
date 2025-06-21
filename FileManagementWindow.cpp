@@ -63,7 +63,77 @@ FileManagementWindow::FileManagementWindow()
     grid->attach(*btn_type, 0, 2, 1, 1);
     grid->attach(*type_entry, 1, 2, 1, 1);
 
-    //vbox->append(*grid);
+    // Row 3 - Move/Rename File
+    auto mv_source_entry = Gtk::make_managed<Gtk::Entry>();
+    mv_source_entry->set_placeholder_text("Source file or directory");
+    auto mv_dest_entry = Gtk::make_managed<Gtk::Entry>();
+    mv_dest_entry->set_placeholder_text("Destination path or name");
+    auto btn_mv = Gtk::make_managed<Gtk::Button>("Move/Rename (mv)");
+    btn_mv->signal_clicked().connect([this, mv_source_entry, mv_dest_entry]() {
+        auto start = std::chrono::steady_clock::now();
+        std::string src = mv_source_entry->get_text();
+        std::string dest = mv_dest_entry->get_text();
+        if (src.empty() || dest.empty()) {
+            output_label.set_text("Please enter both source and destination.");
+            return;
+        }
+        std::string command = "mv '" + src + "' '" + dest + "'";
+        std::cout << "Executing mv..." << std::endl;
+        std::string result;
+        FILE *pipe = popen(command.c_str(), "r");
+        if (pipe) {
+            char buffer[128];
+            while (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
+                result += buffer;
+            }
+            pclose(pipe);
+        }
+        auto end = std::chrono::steady_clock::now();
+        int ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        if (result.empty()) result = "Move/Rename operation completed.";
+        output_label.set_text(result);
+        sys_exec_times_ms.push_back(ms);
+        if (sys_exec_times_ms.size() > 50)
+            sys_exec_times_ms.erase(sys_exec_times_ms.begin());
+        sys_graph_area.queue_draw();
+    });
+    grid->attach(*btn_mv, 0, 3, 1, 1);
+    grid->attach(*mv_source_entry, 1, 3, 1, 1);
+    grid->attach(*mv_dest_entry, 2, 3, 1, 1);
+
+    // Row 4 - Remove File/Directory
+    auto rm_entry = Gtk::make_managed<Gtk::Entry>();
+    rm_entry->set_placeholder_text("File or directory to remove");
+    auto btn_rm = Gtk::make_managed<Gtk::Button>("Remove (rm)");
+    btn_rm->signal_clicked().connect([this, rm_entry]() {
+        auto start = std::chrono::steady_clock::now();
+        std::string target = rm_entry->get_text();
+        if (target.empty()) {
+            output_label.set_text("Please enter a file or directory to remove.");
+            return;
+        }
+        std::string command = "rm -rf '" + target + "'";
+        std::cout << "Executing rm..." << std::endl;
+        std::string result;
+        FILE *pipe = popen(command.c_str(), "r");
+        if (pipe) {
+            char buffer[128];
+            while (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
+                result += buffer;
+            }
+            pclose(pipe);
+        }
+        auto end = std::chrono::steady_clock::now();
+        int ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        if (result.empty()) result = "Remove operation completed.";
+        output_label.set_text(result);
+        sys_exec_times_ms.push_back(ms);
+        if (sys_exec_times_ms.size() > 50)
+            sys_exec_times_ms.erase(sys_exec_times_ms.begin());
+        sys_graph_area.queue_draw();
+    });
+    grid->attach(*btn_rm, 0, 4, 1, 1);
+    grid->attach(*rm_entry, 1, 4, 2, 1);
 
     sys_exec_times_ms.resize(50, 0);
 
@@ -289,8 +359,4 @@ void FileManagementWindow::on_type_clicked()
     sys_graph_area.queue_draw();
 }
 
-void FileManagementWindow::on_exit_clicked()
-{
-    std::cout << "Closing File Management window..." << std::endl;
-    close();
-}
+// ... existing code ...
